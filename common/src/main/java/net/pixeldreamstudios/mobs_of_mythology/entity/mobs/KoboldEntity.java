@@ -38,8 +38,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class KoboldEntity extends AbstractKoboldEntity {
     public DefaultMythAnimations dispatcher;
-    private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(KoboldEntity.class, EntityDataSerializers.ITEM_STACK);
-    ;
+
+    private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK =
+            SynchedEntityData.defineId(KoboldEntity.class, EntityDataSerializers.ITEM_STACK);
 
     public KoboldEntity(EntityType<? extends AbstractKoboldEntity> entityType, Level world) {
         super(entityType, world, Monster.XP_REWARD_SMALL);
@@ -56,15 +57,16 @@ public class KoboldEntity extends AbstractKoboldEntity {
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
+
         if (!getItemStack().isEmpty()) {
-            nbt.put("ItemStack", this.getItemStack().save(new CompoundTag()));
+            nbt.put("ItemStack", getItemStack().save(new CompoundTag()));
         }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        this.setItemStack(ItemStack.of(nbt.getCompound("ItemStack")));
+        setStoredItemInternal(ItemStack.of(nbt.getCompound("ItemStack")), false);
     }
 
     @Override
@@ -72,11 +74,19 @@ public class KoboldEntity extends AbstractKoboldEntity {
         return false;
     }
 
+    private void setStoredItemInternal(ItemStack itemStack, boolean playCelebrateSound) {
+        ItemStack stored = itemStack.copy();
+
+        this.getEntityData().set(DATA_ITEM_STACK, stored);
+        this.setItemInHand(InteractionHand.MAIN_HAND, stored.copy());
+
+        if (playCelebrateSound && !stored.isEmpty() && !level().isClientSide) {
+            this.playSound(SoundEvents.VINDICATOR_CELEBRATE, 1.0f, 2.0f);
+        }
+    }
 
     public void setItemStack(ItemStack itemStack) {
-        this.getEntityData().set(DATA_ITEM_STACK, itemStack);
-        this.playSound(SoundEvents.VINDICATOR_CELEBRATE, 1.0f, 2.0f);
-        this.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
+        setStoredItemInternal(itemStack, true);
     }
 
     public ItemStack getItemStack() {
@@ -84,19 +94,29 @@ public class KoboldEntity extends AbstractKoboldEntity {
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor,
+                                        DifficultyInstance difficultyInstance,
+                                        MobSpawnType mobSpawnType,
+                                        @Nullable SpawnGroupData spawnGroupData,
+                                        @Nullable CompoundTag compoundTag) {
         KoboldVariant variant = Util.getRandom(KoboldVariant.values(), this.random);
         setVariant(variant);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
-    public void die(DamageSource arg) {
-        super.die(arg);
-        ItemStack itemStack = getItemStack();
-        if (!itemStack.isEmpty()) {
-            this.spawnAtLocation(itemStack.split(1));
-            setItemStack(ItemStack.EMPTY);
+    public void die(DamageSource source) {
+        ItemStack stolen = getItemStack().copy();
+
+        // Clear both the synced stored stack and the visible held item
+        // before vanilla death handling to avoid any double-drop path.
+        this.getEntityData().set(DATA_ITEM_STACK, ItemStack.EMPTY);
+        this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+        super.die(source);
+
+        if (!this.level().isClientSide && !stolen.isEmpty()) {
+            this.spawnAtLocation(stolen);
         }
     }
 
@@ -114,6 +134,7 @@ public class KoboldEntity extends AbstractKoboldEntity {
         return BrainActivityGroup.fightTasks(
                 new InvalidateAttackTarget<>()
                         .invalidateIf((target, entity) -> !target.isAlive() || !entity.hasLineOfSight(target)),
+
                 new SetWalkTargetToAttackTarget<>()
                         .startCondition(mob ->
                                 MobsOfMythology.config.shouldKoboldsSteal
@@ -143,24 +164,29 @@ public class KoboldEntity extends AbstractKoboldEntity {
 
                             ItemStack targetStack = target.getItemInHand(InteractionHand.MAIN_HAND);
                             if (targetStack.isEmpty()) return;
-                            ItemStack stolen = targetStack.split(1);
-                            if (!stolen.isEmpty()) {
-                                setItemStack(stolen);
-                            }
+
+                            // Steal the full stack exactly as-is.
+                            ItemStack stolen = targetStack.copy();
+                            target.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+                            setItemStack(stolen);
                         }),
 
                 new FleeTarget<>()
                         .speedModifier(2.0f)
-                        .startCondition(mob -> !getItemStack().isEmpty()
-                                || (BrainUtils.getTargetOfEntity(this) != null
-                                && BrainUtils.getTargetOfEntity(this).is(BrainUtils.getLastAttacker(this))))
+                        .startCondition(mob ->
+                                !getItemStack().isEmpty()
+                                        || (BrainUtils.getTargetOfEntity(this) != null
+                                        && BrainUtils.getTargetOfEntity(this).is(BrainUtils.getLastAttacker(this))))
         );
     }
+
     @Override
     public boolean checkSpawnRules(LevelAccessor level, MobSpawnType spawnType) {
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
             return false;
         }
+
         BlockPos pos = this.blockPosition();
         int skyLight = level.getBrightness(LightLayer.SKY, pos);
         int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
@@ -168,9 +194,9 @@ public class KoboldEntity extends AbstractKoboldEntity {
         if (skyLight > 7 || blockLight > 7) {
             return false;
         }
+
         return super.checkSpawnRules(level, spawnType);
     }
-
 
     @Override
     public <T> T getVariant() {
