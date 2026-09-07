@@ -21,5 +21,18 @@
     "sounds": [
       "mobs_of_mythology:entity/automaton/robotic_voice"
     ]
+  },
+  "wendigo_notice": {
+    "subtitle": "sound.mobs_of_mythology.wendigo_notice",
+    "sounds": [
+      "mobs_of_mythology:entity/wendigo/wendigo_screech_1",
+      "mobs_of_mythology:entity/wendigo/wendigo_screech_2"
+    ]
+  },
+  "wendigo_roar": {
+    "subtitle": "sound.mobs_of_mythology.wendigo_roar",
+    "sounds": [
+      "mobs_of_mythology:entity/wendigo/wendigo_roar"
+    ]
   }
 }

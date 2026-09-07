@@ -15,9 +15,9 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.pixeldreamstudios.mobs_of_mythology.entity.AbstractMythMonsterEntity;
+import net.pixeldreamstudios.mobs_of_mythology.entity.spawn.MythSpawnRules;
 
 public abstract class AbstractKoboldEntity extends AbstractMythMonsterEntity implements Enemy {
     protected static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(AbstractKoboldEntity.class, EntityDataSerializers.INT);
@@ -70,17 +70,9 @@ public abstract class AbstractKoboldEntity extends AbstractMythMonsterEntity imp
     }
     @Override
     public boolean checkSpawnRules(LevelAccessor level, MobSpawnType spawnType) {
-        if (level.getDifficulty() == Difficulty.PEACEFUL) {
-            return false;
-        }
-        BlockPos pos = this.blockPosition();
-        int skyLight = level.getBrightness(LightLayer.SKY, pos);
-        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
-
-        if (skyLight > 7 || blockLight > 7) {
-            return false;
-        }
-        return super.checkSpawnRules(level, spawnType);
+        return level.getDifficulty() != Difficulty.PEACEFUL
+                && MythSpawnRules.isDarkEnough(level, this.blockPosition())
+                && super.checkSpawnRules(level, spawnType);
     }
 
     @Override

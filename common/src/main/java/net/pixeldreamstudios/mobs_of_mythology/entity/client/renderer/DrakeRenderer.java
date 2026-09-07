@@ -1,6 +1,5 @@
 package net.pixeldreamstudios.mobs_of_mythology.entity.client.renderer;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.azure.azurelib.render.entity.AzEntityRenderer;
 import mod.azure.azurelib.render.entity.AzEntityRendererConfig;
@@ -13,6 +12,7 @@ import net.pixeldreamstudios.mobs_of_mythology.entity.client.animator.DrakeAnima
 import net.pixeldreamstudios.mobs_of_mythology.entity.mobs.DrakeEntity;
 import net.pixeldreamstudios.mobs_of_mythology.entity.variant.DrakeVariant;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 public class DrakeRenderer extends AzEntityRenderer<DrakeEntity> {
@@ -22,7 +22,7 @@ public class DrakeRenderer extends AzEntityRenderer<DrakeEntity> {
     );
 
     public static final Map<DrakeVariant, ResourceLocation> LOCATION_BY_VARIANT =
-            Util.make(Maps.newEnumMap(DrakeVariant.class), (map) -> {
+            Util.make(new EnumMap<>(DrakeVariant.class), (map) -> {
                 map.put(DrakeVariant.DRAKE_1, new ResourceLocation(MobsOfMythology.MOD_ID, "textures/entity/drake/drake_1.png"));
                 map.put(DrakeVariant.DRAKE_2, new ResourceLocation(MobsOfMythology.MOD_ID, "textures/entity/drake/drake_2.png"));
                 map.put(DrakeVariant.DRAKE_3, new ResourceLocation(MobsOfMythology.MOD_ID, "textures/entity/drake/drake_3.png"));
@@ -35,9 +35,11 @@ public class DrakeRenderer extends AzEntityRenderer<DrakeEntity> {
     public DrakeRenderer(EntityRendererProvider.Context context) {
         super(
                 AzEntityRendererConfig.<DrakeEntity>builder(
-                                MODEL,
-                                // “base texture” required by config; we override per-entity below
-                                new ResourceLocation(MobsOfMythology.MOD_ID, "textures/entity/drake/drake_1.png")
+                                entity -> MODEL,
+                                entity -> LOCATION_BY_VARIANT.getOrDefault(
+                                        entity.getVariant(),
+                                        new ResourceLocation(MobsOfMythology.MOD_ID, "textures/entity/drake/drake_1.png")
+                                )
                         )
                         .setAnimatorProvider(DrakeAnimator::new)
                         .setShadowRadius(0.75F)

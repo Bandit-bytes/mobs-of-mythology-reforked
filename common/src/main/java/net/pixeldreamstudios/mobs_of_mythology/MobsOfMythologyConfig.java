@@ -70,6 +70,21 @@ public class MobsOfMythologyConfig {
     @Configurable
     @Configurable.Synchronized
     @Configurable.DecimalRange(min = 1)
+    public double wendigoHealth = 80.0;
+    @Configurable
+    @Configurable.Synchronized
+    @Configurable.DecimalRange(min = 1)
+    public double wendigoAttackDamage = 10.0;
+    @Configurable
+    @Configurable.Synchronized
+    @Configurable.DecimalRange(min = 0)
+    public double wendigoArmor = 6.0;
+    @Configurable
+    @Configurable.Synchronized
+    public int wendigoSpawnWeight = 20;
+    @Configurable
+    @Configurable.Synchronized
+    @Configurable.DecimalRange(min = 1)
     public double sporelingHealth = 6.0;
     @Configurable
     @Configurable.Synchronized

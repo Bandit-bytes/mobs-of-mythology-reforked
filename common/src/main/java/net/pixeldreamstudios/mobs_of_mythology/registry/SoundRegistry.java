@@ -12,6 +12,8 @@ public class SoundRegistry {
     public static final RegistrySupplier<SoundEvent> DRAKE_ROAR = SOUND_EVENTS.register("drake_roar", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MobsOfMythology.MOD_ID, "drake_roar")));
     public static final RegistrySupplier<SoundEvent> DRAKE_DEATH = SOUND_EVENTS.register("drake_death", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MobsOfMythology.MOD_ID, "drake_death")));
     public static final RegistrySupplier<SoundEvent> ROBOTIC_VOICE = SOUND_EVENTS.register("robotic_voice", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MobsOfMythology.MOD_ID, "robotic_voice")));
+    public static final RegistrySupplier<SoundEvent> WENDIGO_NOTICE = SOUND_EVENTS.register("wendigo_notice", () -> SoundEvent.createFixedRangeEvent(new ResourceLocation(MobsOfMythology.MOD_ID, "wendigo_notice"), 64.0F));
+    public static final RegistrySupplier<SoundEvent> WENDIGO_ROAR = SOUND_EVENTS.register("wendigo_roar", () -> SoundEvent.createFixedRangeEvent(new ResourceLocation(MobsOfMythology.MOD_ID, "wendigo_roar"), 64.0F));
 
     public static void init() {
         SOUND_EVENTS.register();

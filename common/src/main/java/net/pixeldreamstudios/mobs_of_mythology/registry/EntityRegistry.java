@@ -14,6 +14,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.pixeldreamstudios.mobs_of_mythology.MobsOfMythology;
 import net.pixeldreamstudios.mobs_of_mythology.entity.mobs.*;
+import net.pixeldreamstudios.mobs_of_mythology.entity.spawn.MythSpawnRules;
 
 public class EntityRegistry {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(MobsOfMythology.MOD_ID, Registries.ENTITY_TYPE);
@@ -39,7 +40,7 @@ public class EntityRegistry {
                     .build(new ResourceLocation(MobsOfMythology.MOD_ID, "kobold_warrior").toString()));
 
     public static final RegistrySupplier<EntityType<DrakeEntity>> DRAKE = ENTITIES.register("drake", () ->
-            EntityType.Builder.of(DrakeEntity::new, MobCategory.CREATURE)
+            EntityType.Builder.of(DrakeEntity::new, MobCategory.MONSTER)
                     .sized(1.25f, 1.0f)
                     .build(new ResourceLocation(MobsOfMythology.MOD_ID, "drake").toString()));
 
@@ -48,31 +49,40 @@ public class EntityRegistry {
                     .sized(1.0f, 0.8f)
                     .build(new ResourceLocation(MobsOfMythology.MOD_ID, "sporeling").toString()));
 
+    public static final RegistrySupplier<EntityType<WendigoEntity>> WENDIGO = ENTITIES.register("wendigo", () ->
+            EntityType.Builder.of(WendigoEntity::new, MobCategory.MONSTER)
+                    .sized(2.2f, 5.0f)
+                    .clientTrackingRange(10)
+                    .build(new ResourceLocation(MobsOfMythology.MOD_ID, "wendigo").toString()));
+
     private static void initSpawns() {
-        SpawnPlacementsRegistry.register(EntityRegistry.KOBOLD, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, KoboldEntity::checkAnyLightMonsterSpawnRules);
-        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.WET_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(KOBOLD.get(), MobsOfMythology.config.koboldSpawnWeight, 2, 4)));
+        SpawnPlacementsRegistry.register(EntityRegistry.KOBOLD, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MythSpawnRules::checkDarkGroundSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.KOBOLD_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(KOBOLD.get(), MobsOfMythology.config.koboldSpawnWeight, 2, 4)));
 
-        SpawnPlacementsRegistry.register(EntityRegistry.KOBOLD_WARRIOR, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, KoboldWarriorEntity::checkAnyLightMonsterSpawnRules);
-        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.WET_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(KOBOLD_WARRIOR.get(), MobsOfMythology.config.koboldWarriorSpawnWeight, 2, 3)));
+        SpawnPlacementsRegistry.register(EntityRegistry.KOBOLD_WARRIOR, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MythSpawnRules::checkDarkGroundSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.KOBOLD_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(KOBOLD_WARRIOR.get(), MobsOfMythology.config.koboldWarriorSpawnWeight, 2, 3)));
 
-        SpawnPlacementsRegistry.register(EntityRegistry.DRAKE, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, DrakeEntity::checkMobSpawnRules);
-        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.BADLANDS_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(DRAKE.get(), MobsOfMythology.config.drakeSpawnWeight, 1, 1)));
+        SpawnPlacementsRegistry.register(EntityRegistry.DRAKE, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MythSpawnRules::checkDarkGroundSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.DRAKE_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(DRAKE.get(), MobsOfMythology.config.drakeSpawnWeight, 1, 1)));
 
-        SpawnPlacementsRegistry.register(EntityRegistry.CHUPACABRA, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChupacabraEntity::checkAnyLightMonsterSpawnRules);
-        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.TEMPERATE_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(CHUPACABRA.get(), MobsOfMythology.config.chupacabraSpawnWeight, 1, 1)));
+        SpawnPlacementsRegistry.register(EntityRegistry.CHUPACABRA, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MythSpawnRules::checkDarkGroundSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.CHUPACABRA_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(CHUPACABRA.get(), MobsOfMythology.config.chupacabraSpawnWeight, 1, 1)));
 
-        SpawnPlacementsRegistry.register(EntityRegistry.SPORELING, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SporelingEntity::checkMobSpawnRules);
-        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.MUSHROOM_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(SPORELING.get(), MobsOfMythology.config.sporelingSpawnWeight, 4, 6)));
+        SpawnPlacementsRegistry.register(EntityRegistry.SPORELING, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MythSpawnRules::checkDarkGroundSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.SPORELING_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(SPORELING.get(), MobsOfMythology.config.sporelingSpawnWeight, 4, 6)));
+
+        SpawnPlacementsRegistry.register(EntityRegistry.WENDIGO, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, WendigoEntity::checkWendigoSpawnRules);
+        BiomeModifications.addProperties(b -> b.hasTag(TagRegistry.WENDIGO_BIOMES), (ctx, b) -> b.getSpawnProperties().addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(WENDIGO.get(), MobsOfMythology.config.wendigoSpawnWeight, 1, 1)));
     }
 
     private static void initAttributes() {
         EntityAttributeRegistry.register(AUTOMATON, AutomatonEntity::createAttributes);
         EntityAttributeRegistry.register(CHUPACABRA, ChupacabraEntity::createAttributes);
-        EntityAttributeRegistry.register(CHUPACABRA, ChupacabraEntity::createAttributes);
         EntityAttributeRegistry.register(KOBOLD, KoboldEntity::createAttributes);
         EntityAttributeRegistry.register(KOBOLD_WARRIOR, KoboldWarriorEntity::createAttributes);
         EntityAttributeRegistry.register(DRAKE, DrakeEntity::createAttributes);
         EntityAttributeRegistry.register(SPORELING, SporelingEntity::createAttributes);
+        EntityAttributeRegistry.register(WENDIGO, WendigoEntity::createAttributes);
     }
 
     public static void init() {

@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#forge:is_hot", "required": false },
+    { "id": "#c:climate_temperate", "required": false },
+    { "id": "#c:is_temperate", "required": false },
+    { "id": "#c:climate_hot", "required": false },
+    { "id": "#c:is_hot", "required": false },
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:savanna"
+  ]
+}
